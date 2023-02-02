@@ -26,8 +26,8 @@ class HandsDetection:
         return image
 
 def main():
-    prev_time = 0
-    curr_time = 0
+    prev_time = 0 #pTime = 0
+    curr_time = 0 #cTime = 0
 
     cap = cv2.VideoCapture(0)
     detector = HandsDetection()
