@@ -1,7 +1,6 @@
 import cv2
 import config
 import mediapipe as mp
-import numpy as np
 class HolisticDetection():
     def __init__(self,static_image_mode=True,model_complexity=2,refine_face_landmarks=True,
                 min_detection_confidence=0.5,min_tracking_confidence=0.5):
@@ -17,30 +16,26 @@ class HolisticDetection():
         self.holistic = self.mpHolistic.Holistic()
 
     def findHolistic(self, image, draw=True):
-        if not image.size:
-            return None
-        """
-        image.flags.writeable = False
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        results = self.holistic.process(image)
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        """
-        image_height, image_width, _ = image.shape
-        results = self.holistic.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        imgRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        results = self.holistic.process(imgRGB)
 
-        if draw:
-            self.mp_drawing.draw_landmarks(
-                results.face_landmarks,
-                results.pose_landmarks,
-                self.mpHolistic.FACEMESH_CONTOURS,
-                self.mpHolistic.POSE_CONNECTIONS,
-                self.mpHolistic.FACEMESH_TESSELATION,
-                #landmark_drawing_spec=self.mp_drawing_styles.get_default_pose_landmarks_style(),
-                #connection_drawing_spec = self.mp_drawing_styles.get_default_face_mesh_tesselation_style(),
-                #connection_drawing_spec=self.mp_drawing_styles.get_default_face_mesh_contours_style()
-            )
-
+        # face mesh
+        self.mp_drawing.draw_landmarks(
+            image,
+            results.face_landmarks,
+            self.mpHolistic.FACEMESH_TESSELATION,
+            #landmark_drawing_spec=self.mp_drawing.draw_landmarks(),
+            landmark_drawing_spec=None,
+            connection_drawing_spec=self.mp_drawing_styles.get_default_face_mesh_tesselation_style()
+        )
+        # pose
+        self.mp_drawing.draw_landmarks(
+            image,
+            results.pose_landmarks,
+            self.mpHolistic.POSE_CONNECTIONS,
+            landmark_drawing_spec=self.mp_drawing_styles.get_default_pose_landmarks_style()
+        )
+        return image
 
 def main():
     detector = HolisticDetection()
@@ -52,15 +47,11 @@ def main():
             break
 
         output_frame = detector.findHolistic(frame)
-        if output_frame is not None:
-            cv2.imshow('Holistic Detection', output_frame)
-        else:
-            break
+        cv2.imshow('Holistic Detection', output_frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
-
 main()
