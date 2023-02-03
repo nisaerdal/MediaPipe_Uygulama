@@ -1,8 +1,6 @@
 import cv2
 import mediapipe as mp
-import time
-
-
+import config
 class HandsDetection():
     def __init__(self, mode=False, maxHands=2, detectionCon=0.5, trackCon=0.5):
         self.mode = mode
@@ -30,7 +28,7 @@ class HandsDetection():
 
 def main():
     detector = HandsDetection()
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(config.video_file)
 
     while True:
         ret, frame = cap.read()

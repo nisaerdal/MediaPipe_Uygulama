@@ -1,35 +1,38 @@
 import cv2
+import config
 import mediapipe as mp
 
 class PoseDetection:
-    def __init__(self, mode=False, upBody = False,smooth= True,
-                 detectionCon=0.5, trackCon=0.5):
-        self.mode = mode
-        self.upBody = upBody
-        self.smooth = smooth
-        self.detectionCon = detectionCon
-        self.trackCon = trackCon
+    def __init__(self,static_image_mode=True,model_complexity=2,min_detection_confidence=0.5,min_tracking_confidence=0.5):
+        self.static_image_mode = static_image_mode
+        self.model_complexity = model_complexity
+        self.min_detection_confidence = min_detection_confidence
+        self.min_tracking_confidence = min_tracking_confidence
 
-        self.pose_drawing = mp.solutions.drawing_utils
-        self.pose_drawing_styles = mp.solutions.drawing_styles
-        self.pose = mp.solutions.pose.Pose(self.mode, self.upBody, self.smooth,
-                                           int(self.detectionCon), int(self.trackCon))
+        self.mp_drawing = mp.solutions.drawing_utils
+        self.mp_drawing_styles = mp.solutions.drawing_styles
+        self.mpPose = mp.solutions.pose
+        self.pose = self.mpPose.Pose()
 
     def findPose(self, image, draw=True):
-        imgRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        results = self.pose.process(imgRGB)
-        if results.pose_landmarks:
-            if draw:
-                self.pose_drawing.draw_landmarks(
-                    image,
-                    results.pose_landmarks,
-                    self.pose.POSE_CONNECTIONS
-                )
+        image.flags.writeable = False
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        results = self.pose.process(image)
+
+        # Draw the pose annotation on the image.
+        image.flags.writeable = True
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        self.mp_drawing.draw_landmarks(
+            image,
+            results.pose_landmarks,
+            self.mpPose.POSE_CONNECTIONS,
+            landmark_drawing_spec=self.mp_drawing_styles.get_default_pose_landmarks_style())
         return image
+
 
 def main():
     detector = PoseDetection()
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(config.video_file)
 
     while True:
         ret, frame = cap.read()
