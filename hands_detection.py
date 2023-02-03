@@ -2,7 +2,8 @@ import cv2
 import mediapipe as mp
 import time
 
-class HandsDetection:
+
+class HandsDetection():
     def __init__(self, mode=False, maxHands=2, detectionCon=0.5, trackCon=0.5):
         self.mode = mode
         self.maxHands = maxHands
@@ -11,7 +12,8 @@ class HandsDetection:
 
         self.mpHands = mp.solutions.hands
         self.hands = self.mpHands.Hands(self.mode, self.maxHands,
-                                        self.detectionCon, self.trackCon)
+                                        int(self.detectionCon), int(self.trackCon))
+
         self.mpDraw = mp.solutions.drawing_utils
 
     def findHands(self, image, draw=True):
@@ -25,26 +27,22 @@ class HandsDetection:
                                                self.mpHands.HAND_CONNECTIONS)
         return image
 
-def main():
-    prev_time = 0 #pTime = 0
-    curr_time = 0 #cTime = 0
 
-    cap = cv2.VideoCapture(0)
+def main():
     detector = HandsDetection()
+    cap = cv2.VideoCapture(0)
 
     while True:
-        success, image = cap.read()
-        image = detector.findHands(image)
-        curr_time = time.time()
-        fps = 1 / (curr_time - prev_time)
-        prev_time = curr_time
-
-        cv2.putText(image, str(int(fps)), (10, 70),
-                    cv2.FONT_HERSHEY_PLAIN, 3,
-                    (255, 0, 255), 3)
-
-        cv2.imshow('Hands Detection', image)
-        if cv2.waitKey(1) == 27:
-            cv2.destroyAllWindows()
-            cap.release()
+        ret, frame = cap.read()
+        if not ret:
             break
+
+        output_frame = detector.findHands(frame)
+        cv2.imshow('Hand Detection', output_frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+main()
