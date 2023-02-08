@@ -28,7 +28,8 @@ class HandsDetection():
 
 def main():
     detector = HandsDetection()
-    cap = cv2.VideoCapture(config.video_file)
+    #cap = cv2.VideoCapture(config.video_file)
+    cap = cv2.VideoCapture(0)
 
     while True:
         ret, frame = cap.read()

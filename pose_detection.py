@@ -33,6 +33,7 @@ class PoseDetection:
 def main():
     detector = PoseDetection()
     cap = cv2.VideoCapture(config.video_file)
+    #cap = cv2.VideoCapture(0)
 
     while True:
         ret, frame = cap.read()
